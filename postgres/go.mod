@@ -1,4 +1,4 @@
-module postgres
+module github.com/maishiro/golang/postgres
 
 go 1.17
 

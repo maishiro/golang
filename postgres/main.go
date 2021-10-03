@@ -3,13 +3,34 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func main() {
+	// 引数の数を確認する。
+	if len(os.Args) < 3 {
+		showCommandArgs()
+		os.Exit(1)
+	}
+	// os.Argsを確認する。
+	// fmt.Println(os.Args)
+
+	// コマンド引数解析
+	// flag.Parse()
+	// fmt.Println(flag.Args())
+
+	// fmt.Println(os.Args[1])
+	// fmt.Println(os.Args[2])
+
+	// ファイル読み込み
+	sql_statement := ReadSQLFile(os.Args[2])
+
 	// 環境変数読み込み
 	cfg := loadEnv()
 	// fmt.Println(cfg.ConnectionString())
@@ -22,24 +43,13 @@ func main() {
 	checkError(err)
 	// fmt.Println("Successfully created connection to database")
 
-	// DB読み込み
-	sql_statement := "select * from status;"
-	rows, err := db.Query(sql_statement)
-	checkError(err)
-	defer rows.Close()
-
-	var id int
-	var time string
-	var data int
-	for rows.Next() {
-		switch err := rows.Scan(&id, &time, &data); err {
-		case sql.ErrNoRows:
-			fmt.Println("No rows were returned")
-		case nil:
-			fmt.Printf("Data row = (%d, %s, %d)\n", id, time, data)
-		default:
-			checkError(err)
-		}
+	switch os.Args[1] {
+	case "query":
+		doQuery(db, sql_statement)
+	case "command":
+		doCommand(db, sql_statement)
+	default:
+		showCommandArgs()
 	}
 }
 
@@ -47,6 +57,11 @@ func checkError(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func showCommandArgs() {
+	fmt.Println("ERROR: Command args")
+	fmt.Println("  cmd [CommandType command/query] [SQL file path]")
 }
 
 type DbConfig struct {
@@ -88,4 +103,75 @@ func loadEnv() DbConfig {
 	cfg.UserPassword = userpass
 
 	return cfg
+}
+
+// SQLファイルの読み込み
+func ReadSQLFile(fileName string) string {
+	bytes, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		panic(err)
+	}
+	// fmt.Println(string(bytes))
+	return string(bytes)
+}
+
+// DBクエリー(値が返るとき)
+func doQuery(db *sql.DB, sql_statement string) {
+	// DB読み込み
+	rows, err := db.Query(sql_statement)
+	checkError(err)
+	defer rows.Close()
+
+	// // Data Column Type
+	// colTypes, err := rows.ColumnTypes()
+	// for _, t := range colTypes {
+	// 	fmt.Println(t.ScanType())
+	// }
+
+	// Data Column Header
+	cols, err := rows.Columns()
+	fmt.Println(strings.Join(cols, ","))
+
+	// Data
+	for rows.Next() {
+		var row = make([]interface{}, len(cols))
+		var rowp = make([]interface{}, len(cols))
+		for i := 0; i < len(cols); i++ {
+			rowp[i] = &row[i]
+		}
+
+		err := rows.Scan(rowp...)
+		switch err {
+		case sql.ErrNoRows:
+			fmt.Println("No rows were returned")
+		case nil:
+			rowValue := []string{}
+			for i, _ := range cols {
+				switch row[i].(type) {
+				case int64:
+					row[i] = row[i].(int64)
+					rowValue = append(rowValue, fmt.Sprintf("%d", row[i]))
+				case time.Time:
+					var dt time.Time
+					dt = row[i].(time.Time)
+					row[i] = dt.Format("2006-01-02 15:04:05-0700")
+					rowValue = append(rowValue, dt.Format("2006-01-02 15:04:05-0700"))
+				default:
+					fmt.Println(row[i])
+					fmt.Println(row[i].(string))
+					rowValue = append(rowValue, row[i].(string))
+				}
+			}
+			fmt.Println(strings.Join(rowValue, ","))
+		default:
+			checkError(err)
+		}
+	}
+}
+
+// DB更新コマンド(Insert,Delete,Update,...)
+func doCommand(db *sql.DB, sql_statement string) {
+	// DB更新
+	_, err := db.Exec(sql_statement)
+	checkError(err)
 }
