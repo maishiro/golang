@@ -38,6 +38,7 @@ func main() {
 	// PostgreSQLへ接続
 	db, err := sql.Open("postgres", cfg.ConnectionString())
 	checkError(err)
+	defer db.Close()
 
 	err = db.Ping()
 	checkError(err)
@@ -148,17 +149,27 @@ func doQuery(db *sql.DB, sql_statement string) {
 			rowValue := []string{}
 			for i, _ := range cols {
 				switch row[i].(type) {
+				case []uint8:
+					var s string
+					s = string(row[i].([]uint8))
+					rowValue = append(rowValue, s)
 				case int64:
 					row[i] = row[i].(int64)
 					rowValue = append(rowValue, fmt.Sprintf("%d", row[i]))
+				case bool:
+					row[i] = row[i].(bool)
+					rowValue = append(rowValue, fmt.Sprintf("%t", row[i]))
+				case string:
+					row[i] = row[i].(string)
+					rowValue = append(rowValue, fmt.Sprintf("%s", row[i]))
 				case time.Time:
 					var dt time.Time
 					dt = row[i].(time.Time)
 					row[i] = dt.Format("2006-01-02 15:04:05-0700")
 					rowValue = append(rowValue, dt.Format("2006-01-02 15:04:05-0700"))
 				default:
-					fmt.Println(row[i])
-					fmt.Println(row[i].(string))
+					// fmt.Println(row[i])
+					// fmt.Println(row[i].(string))
 					rowValue = append(rowValue, row[i].(string))
 				}
 			}
