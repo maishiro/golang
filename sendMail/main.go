@@ -29,6 +29,7 @@ func main() {
 	bcc := []string{
 		"bcc1@example.com",
 	}
+	receivers := append(to, cc...)
 
 	boundary := "my-boundary-365"
 
@@ -66,7 +67,7 @@ func main() {
 	auth := smtp.PlainAuth("", from, password, smtpHost)
 
 	// Send email
-	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, to, []byte(msg))
+	err := smtp.SendMail(smtpHost+":"+smtpPort, auth, from, receivers, []byte(msg))
 	if err != nil {
 		fmt.Println(err)
 		return
