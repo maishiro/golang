@@ -16,7 +16,7 @@ import (
 
 func main() {
 
-	fileBuf, err := loadFile("logfile.log")
+	fileBuf, err := LoadFile("logfile.log")
 	if err != nil {
 		panic(err)
 	}
@@ -50,25 +50,27 @@ func main() {
 		for k, vv := range regs {
 			if k.MatchString(line) {
 				result := rDateTime.FindAllStringSubmatch(line, -1)
-				strDateTime := fmt.Sprintf("%s.%s", result[0][1], result[0][2])
-				dtDateTime, _ := time.ParseInLocation(layout, strDateTime, loc)
+				if result != nil {
+					strDateTime := fmt.Sprintf("%s.%s", result[0][1], result[0][2])
+					dtDateTime, _ := time.ParseInLocation(layout, strDateTime, loc)
 
-				for _, v := range vv {
-					// df2 := dataframe.LoadRecords(
-					// 	[][]string{
-					// 		[]string{"DATETIME", "METHOD", "MESSAGE"},
-					// 		[]string{strDateTime, v, result[0][3]},
-					// 	},
-					// )
-					// df = df.RBind(df2)
+					for _, v := range vv {
+						// df2 := dataframe.LoadRecords(
+						// 	[][]string{
+						// 		[]string{"DATETIME", "METHOD", "MESSAGE"},
+						// 		[]string{strDateTime, v, result[0][3]},
+						// 	},
+						// )
+						// df = df.RBind(df2)
 
-					colDateTimeStr = append(colDateTimeStr, strDateTime)
-					colDateTime = append(colDateTime, dtDateTime)
-					colMethod = append(colMethod, v)
-					colMessage = append(colMessage, result[0][3])
+						colDateTimeStr = append(colDateTimeStr, strDateTime)
+						colDateTime = append(colDateTime, dtDateTime)
+						colMethod = append(colMethod, v)
+						colMessage = append(colMessage, result[0][3])
+					}
+
+					break
 				}
-
-				break
 			}
 		}
 	}
@@ -82,10 +84,8 @@ func main() {
 	fmt.Printf("time: %vms\n", time.Since(now).Milliseconds())
 	// fmt.Println(df)
 
-	csvFile, _ := os.Create("data.csv")
-	defer csvFile.Close()
-
-	df.WriteCSV(csvFile)
+	pathSaveFile := "data.csv"
+	SaveFileCSV(&df, pathSaveFile)
 
 	// dfSel := df.Select([]string{"DATETIME"})
 	// fmt.Println(dfSel)
@@ -105,6 +105,12 @@ func main() {
 			Title: &grob.LayoutTitle{
 				Text: "A Figure",
 			},
+			Xaxis: &grob.LayoutXaxis{
+				Title: &grob.LayoutXaxisTitle{
+					Text: "timestamp",
+				},
+				Tickformat: "%Y/%m/%d %H:%M:%S",
+			},
 		},
 	}
 
@@ -113,7 +119,7 @@ func main() {
 
 }
 
-func loadFile(path string) (string, error) {
+func LoadFile(path string) (string, error) {
 
 	f, err := os.Open(path)
 	if err != nil {
@@ -127,4 +133,11 @@ func loadFile(path string) (string, error) {
 	}
 
 	return string(b), nil
+}
+
+func SaveFileCSV(df *dataframe.DataFrame, pathFile string) {
+	csvFile, _ := os.Create(pathFile)
+	defer csvFile.Close()
+
+	df.WriteCSV(csvFile)
 }
