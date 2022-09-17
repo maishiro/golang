@@ -16,7 +16,7 @@ import (
 
 func main() {
 
-	fileBuf, err := loadFile("logfile.log")
+	fileBuf, err := LoadFile("logfile.log")
 	if err != nil {
 		panic(err)
 	}
@@ -113,7 +113,7 @@ func main() {
 
 }
 
-func loadFile(path string) (string, error) {
+func LoadFile(path string) (string, error) {
 
 	f, err := os.Open(path)
 	if err != nil {
