@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -14,9 +12,12 @@ import (
 	"github.com/go-gota/gota/series"
 )
 
-func main() {
+type userService struct {
+	stream FileLoadSave
+}
 
-	fileBuf, err := LoadFile("logfile.log")
+func (s *userService) Run(pathInput string, pathOutput string) {
+	fileBuf, err := s.stream.LoadFile(pathInput)
 	if err != nil {
 		panic(err)
 	}
@@ -84,8 +85,7 @@ func main() {
 	fmt.Printf("time: %vms\n", time.Since(now).Milliseconds())
 	// fmt.Println(df)
 
-	pathSaveFile := "data.csv"
-	SaveFileCSV(&df, pathSaveFile)
+	s.stream.SaveFileCSV(&df, pathOutput)
 
 	// dfSel := df.Select([]string{"DATETIME"})
 	// fmt.Println(dfSel)
@@ -116,28 +116,9 @@ func main() {
 
 	// offline.Show(fig)
 	offline.ToHtml(fig, "graph.html")
-
 }
 
-func LoadFile(path string) (string, error) {
-
-	f, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		return "", err
-	}
-
-	return string(b), nil
-}
-
-func SaveFileCSV(df *dataframe.DataFrame, pathFile string) {
-	csvFile, _ := os.Create(pathFile)
-	defer csvFile.Close()
-
-	df.WriteCSV(csvFile)
+func main() {
+	service := userService{stream: NewFileLoadSave()}
+	service.Run("logfile.log", "data.csv")
 }

@@ -1,75 +1,22 @@
 package main
 
 import (
-	"os"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+
+	mock "github.com/maishiro/golang/loadlog/mocks"
 )
 
-func TestLoadFileNone(t *testing.T) {
-	dir, _ := os.Getwd()
-	filename := dir + "/exampleNone.txt"
-	contents, err := LoadFile(filename)
-	if contents != "" {
-		t.Fatalf(`Contents is not "" but it is %s`, contents)
-	}
-	if err == nil {
-		t.Fatal(`Content file load  why success: ??`)
-	}
-}
+func TestRun(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-func TestLoadFileExist(t *testing.T) {
-	dir, _ := os.Getwd()
-	filename := dir + "/exampleExist.txt"
+	fileMock := mock.NewMockFileLoadSave(ctrl)
+	strInput := "[2020/04/26 19:44:41:123] func1 Start\r\n[2020/04/27 14:36:30:456] func1 End\r\n"
+	fileMock.EXPECT().LoadFile("example.log").Return(strInput, nil)
+	fileMock.EXPECT().SaveFileCSV(gomock.Any(), "output.csv")
 
-	contentExpect := "abc"
-	file, _ := os.Create(filename)
-	defer func() {
-		file.Close()
-		os.Remove(filename)
-	}()
-
-	if file != nil {
-		file.WriteString(contentExpect)
-	}
-
-	contents, err := LoadFile(filename)
-	if contents != contentExpect {
-		t.Fatalf(`Contents is not "%s" but it is %s`, contentExpect, contents)
-	}
-	if err != nil {
-		t.Fatalf(`Content file load failed: %s`, err.Error())
-	}
-}
-
-// add from IDE tool
-func TestLoadFile(t *testing.T) {
-	type args struct {
-		path string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		// TODO: Add test cases.
-		{
-			name:    "file none",
-			args:    args{path: "noneFileName.txt"},
-			want:    "",
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := LoadFile(tt.args.path)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("LoadFile() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if got != tt.want {
-				t.Errorf("LoadFile() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	service := userService{stream: fileMock}
+	service.Run("example.log", "output.csv")
 }
