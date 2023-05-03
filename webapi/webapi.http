@@ -7,19 +7,32 @@
 GET {{URL_BASE}}
 Accept: application/json
 
+###
+# @name addUserFail
+POST {{URL_BASE}}/user
+Accept: application/json
+Content-Type: application/json
 
 ###
 # @name addUser
 POST {{URL_BASE}}/user
 Accept: application/json
-Content-type: application/json
+Content-Type: application/json
 
 {
-  "username": "user1 name2",
-  "firstName": "user1",
-  "lastName": "name2",
-  "email": "mailaddress3",
+  "username": "username1",
+  "firstName": "user2",
+  "lastName": "name3",
+  "email": "mailaddress4",
   "password": "password1234",
   "phone": "0123456789",
   "userStatus": 0
 }
+
+###
+@user_name={{addUser.response.body.$.username}}
+
+# @name getUserByName
+GET {{URL_BASE}}/user/{{user_name}}
+Accept: application/json
+Content-Type: application/json

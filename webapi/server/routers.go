@@ -7,7 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	ctrl "../controller"
+	ctrl "webapi/controller"
 )
 
 type Route struct {
@@ -53,5 +53,12 @@ var routes = Routes{
 		strings.ToUpper("Post"),
 		"/v2/user",
 		ctrl.CreateUser,
+	},
+
+	Route{
+		"GetUserByName",
+		strings.ToUpper("Get"),
+		"/v2/user/{username}",
+		ctrl.GetUserByName,
 	},
 }
