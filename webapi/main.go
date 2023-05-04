@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"webapi/model"
+	"webapi/entity"
 
 	sw "webapi/server"
 
@@ -12,11 +12,11 @@ import (
 )
 
 func main() {
-	err := model.NewConnectDB()
+	err := entity.NewConnectDB()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer model.CloseDB()
+	defer entity.CloseDB()
 
 	log.Printf("Server start")
 

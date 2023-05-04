@@ -22,7 +22,7 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	var id int64 = 0
 	sql := `INSERT INTO "user" ("username", "firstname", "lastname", "email", "password", "phone", "userstatus") VALUES (?,?,?,?,?,?,?) RETURNING "id"`
-	result, err := model.Engine.SQL(sql, t.Username, t.FirstName, t.LastName, t.Email, t.Password, t.Phone, t.UserStatus).Get(&id)
+	result, err := entity.Engine.SQL(sql, t.Username, t.FirstName, t.LastName, t.Email, t.Password, t.Phone, t.UserStatus).Get(&id)
 	if err != nil {
 		log.Printf("err: [%v]\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -44,7 +44,7 @@ func GetUserByName(w http.ResponseWriter, r *http.Request) {
 	log.Printf("username: [%s]\n", user_name)
 
 	item := entity.User{}
-	result, err := model.Engine.Where("username = ?", user_name).Get(&item)
+	result, err := entity.Engine.Where("username = ?", user_name).Get(&item)
 	if err != nil {
 		log.Printf("err: [%v]\n", err)
 	}
