@@ -1,46 +1,37 @@
 package controller
 
 import (
-	"encoding/json"
 	"log"
-	"net/http"
 	"webapi/entity"
 	"webapi/model"
 
-	"github.com/gorilla/mux"
+	"github.com/gofiber/fiber/v2"
 )
 
-func CreateUser(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var t model.User
-	err := decoder.Decode(&t)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		return
+func CreateUser(c *fiber.Ctx) error {
+	t := new(model.User)
+	if err := c.BodyParser(t); err != nil {
+		return err
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	var id int64 = 0
 	sql := `INSERT INTO "user" ("username", "firstname", "lastname") VALUES (?,?,?) RETURNING "id"`
 	result, err := entity.Engine.SQL(sql, t.Username, t.FirstName, t.LastName).Get(&id)
 	if err != nil {
 		log.Printf("err: [%v]\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
+		return c.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
 	} else {
-		w.WriteHeader(http.StatusOK)
+
 	}
 	log.Printf("result: [%v]\n", result)
 	log.Printf("id: [%v]\n", id)
 	t.Id = id
 
-	b, _ := json.Marshal(t)
-	w.Write(b)
+	return c.JSON(t)
 }
 
-func GetUserByName(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	user_name := vars["username"]
+func GetUserByName(c *fiber.Ctx) error {
+	user_name := c.Params("username")
 	log.Printf("username: [%s]\n", user_name)
 
 	item := entity.User{}
@@ -49,7 +40,6 @@ func GetUserByName(w http.ResponseWriter, r *http.Request) {
 		log.Printf("err: [%v]\n", err)
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	user := model.User{}
 	if !result {
 		log.Println("Not Found")
@@ -62,12 +52,5 @@ func GetUserByName(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	b, err := json.Marshal(user)
-	if err != nil {
-		log.Printf("err: [%v]\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-	} else {
-		w.WriteHeader(http.StatusOK)
-		w.Write(b)
-	}
+	return c.JSON(user)
 }

@@ -1,11 +1,11 @@
 package model
 
 type User struct {
-	Id int64 `json:"id,omitempty"`
+	Id int64 `json:"id" xml:"id" form:"id"`
 
-	Username string `json:"username,omitempty"`
+	Username string `json:"username" xml:"username" form:"username"`
 
-	FirstName string `json:"firstName,omitempty"`
+	FirstName string `json:"firstName" xml:"firstName" form:"firstName"`
 
-	LastName string `json:"lastName,omitempty"`
+	LastName string `json:"lastName" xml:"lastName" form:"lastName"`
 }

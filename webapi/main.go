@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	"net/http"
 
 	"webapi/entity"
 
@@ -21,5 +20,5 @@ func main() {
 	log.Printf("Server start")
 
 	router := sw.NewRouter()
-	log.Fatal(http.ListenAndServe(":8080", router))
+	router.Listen(":8080")
 }
