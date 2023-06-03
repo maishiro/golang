@@ -22,11 +22,7 @@ Content-Type: application/json
 {
   "username": "username1",
   "firstName": "user2",
-  "lastName": "name3",
-  "email": "mailaddress4",
-  "password": "password1234",
-  "phone": "0123456789",
-  "userStatus": 0
+  "lastName": "name3"
 }
 
 ###

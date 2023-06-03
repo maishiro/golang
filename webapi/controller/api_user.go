@@ -21,8 +21,8 @@ func CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	var id int64 = 0
-	sql := `INSERT INTO "user" ("username", "firstname", "lastname", "email", "password", "phone", "userstatus") VALUES (?,?,?,?,?,?,?) RETURNING "id"`
-	result, err := entity.Engine.SQL(sql, t.Username, t.FirstName, t.LastName, t.Email, t.Password, t.Phone, t.UserStatus).Get(&id)
+	sql := `INSERT INTO "user" ("username", "firstname", "lastname") VALUES (?,?,?) RETURNING "id"`
+	result, err := entity.Engine.SQL(sql, t.Username, t.FirstName, t.LastName).Get(&id)
 	if err != nil {
 		log.Printf("err: [%v]\n", err)
 		w.WriteHeader(http.StatusInternalServerError)
@@ -55,14 +55,10 @@ func GetUserByName(w http.ResponseWriter, r *http.Request) {
 		log.Println("Not Found")
 	} else {
 		user = model.User{
-			Id:         item.Id,
-			Username:   item.Username,
-			FirstName:  item.FirstName,
-			LastName:   item.LastName,
-			Email:      item.Email,
-			Password:   item.Password,
-			Phone:      item.Phone,
-			UserStatus: item.UserStatus,
+			Id:        item.Id,
+			Username:  item.Username,
+			FirstName: item.FirstName,
+			LastName:  item.LastName,
 		}
 	}
 

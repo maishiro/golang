@@ -8,13 +8,4 @@ type User struct {
 	FirstName string `json:"firstName,omitempty"`
 
 	LastName string `json:"lastName,omitempty"`
-
-	Email string `json:"email,omitempty"`
-
-	Password string `json:"password,omitempty"`
-
-	Phone string `json:"phone,omitempty"`
-
-	// User Status
-	UserStatus int32 `json:"userStatus,omitempty"`
 }
