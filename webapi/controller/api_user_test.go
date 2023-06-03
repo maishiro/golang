@@ -3,7 +3,7 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http/httptest"
 	"testing"
 	"webapi/entity"
@@ -38,7 +38,7 @@ func TestCreateUser(t *testing.T) {
 	resp, err := app.Test(req, -1)
 	assert.Nil(t, err)
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)
 	items := model.User{}
 	err = json.Unmarshal(data, &items)
@@ -68,7 +68,7 @@ func TestGetUserByName(t *testing.T) {
 	resp, err := app.Test(req, -1)
 	assert.Nil(t, err)
 
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	assert.Nil(t, err)
 	items := model.User{}
 	err = json.Unmarshal(data, &items)
