@@ -8,12 +8,4 @@ type User struct {
 	FirstName string `xorm:"firstname"`
 
 	LastName string `xorm:"lastname"`
-
-	Email string `xorm:"email"`
-
-	Password string `xorm:"password"`
-
-	Phone string `xorm:"phone"`
-
-	UserStatus int32 `xorm:"userstatus"`
 }
