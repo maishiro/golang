@@ -25,7 +25,7 @@ func TestCreateUser(t *testing.T) {
 	entity.NewConnectDBWithDB(db)
 	defer entity.CloseDB()
 
-	body := `{"username":"username3","firstName":"user2","lastName":"name3","email":"mailaddress4","password":"password1234","phone":"0123456789","userStatus":0}`
+	body := `{"username":"username3","firstName":"user2","lastName":"name3"}`
 	r := httptest.NewRequest(http.MethodPost, "/v2/user", bytes.NewBuffer([]byte(body)))
 	w := httptest.NewRecorder()
 
@@ -59,8 +59,8 @@ func TestGetUserByName(t *testing.T) {
 	r := httptest.NewRequest(http.MethodGet, "/v2/user/username1", nil)
 	w := httptest.NewRecorder()
 
-	rows := sqlmock.NewRows([]string{"id", "username", "firstName", "lastName", "email", "password", "phone", "userStatus"}).
-		AddRow(13, "username3", "user2", "name3", "mailaddress4", "password1234", "0123456789", 0)
+	rows := sqlmock.NewRows([]string{"id", "username", "firstName", "lastName"}).
+		AddRow(13, "username3", "user2", "name3")
 	mock.ExpectQuery(`^SELECT "id"(.+)$`).WillReturnRows(rows)
 
 	// Router, URL Parameter for UnitTest
