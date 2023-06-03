@@ -3,7 +3,7 @@ package controller
 import (
 	"bytes"
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -38,7 +38,7 @@ func TestCreateUser(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	res := w.Result()
 	defer res.Body.Close()
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	items := model.User{}
 	err = json.Unmarshal(data, &items)
@@ -72,7 +72,7 @@ func TestGetUserByName(t *testing.T) {
 	res := w.Result()
 	defer res.Body.Close()
 
-	data, err := ioutil.ReadAll(res.Body)
+	data, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	items := model.User{}
 	err = json.Unmarshal(data, &items)
