@@ -4,4 +4,4 @@ import {context} from '../models';
 
 export function Greet(arg1:string):Promise<string>;
 
-export function SetContext(arg1:context.Context):void;
+export function SetContext(arg1:context.Context):Promise<void>;
