@@ -2,8 +2,12 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
 	"webapi/entity"
 	"webapi/model"
 
@@ -70,4 +74,62 @@ func GetUserByName(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write(b)
 	}
+}
+
+func UploadHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	filename := vars["filename"]
+	log.Printf("filename: [%s]\n", filename)
+
+	// 保存先ディレクトリ
+	root := "./data"
+	os.MkdirAll(root, os.ModePerm)
+
+	filePath := filepath.Join(root, filename)
+	log.Printf("filePath: [%s]\n", filePath)
+
+	// ファイルへストリーム書き込み
+	out, err := os.Create(filePath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatalf("Failed to create file: %s, error: %v", filePath, err)
+		return
+	}
+	defer out.Close()
+
+	// リクエストボディをそのままコピー
+	size, err := io.Copy(out, r.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatalf("Failed to write file: %s, error: %v", filePath, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Fprintf(w, `{"filename":"%s","size":%d}`, filename, size)
+	log.Printf("Uploaded file: %s (%d bytes)\n", filename, size)
+}
+
+func DownloadHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	filename := vars["filename"]
+	log.Printf("filename: [%s]\n", filename)
+
+	root := "./data"
+	filePath := filepath.Join(root, filename)
+	log.Printf("filePath: [%s]\n", filePath)
+
+	// ファイル存在チェック
+	if _, err := os.Stat(filePath); os.IsNotExist(err) {
+		http.Error(w, "file not found", http.StatusNotFound)
+		log.Fatalf("File not found: %s", filePath)
+		return
+	}
+
+	// Content-Type をバイナリに設定
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Disposition", "attachment; filename="+filename)
+
+	// http.ServeFile が最速
+	http.ServeFile(w, r, filePath)
 }

@@ -61,4 +61,17 @@ var routes = Routes{
 		"/v2/user/{username}",
 		ctrl.GetUserByName,
 	},
+
+	Route{
+		"UploadFile",
+		strings.ToUpper("Put"),
+		"/v2/upload/{filename}",
+		ctrl.UploadHandler,
+	},
+	Route{
+		"DownloadFile",
+		strings.ToUpper("Get"),
+		"/v2/download/{filename}",
+		ctrl.DownloadHandler,
+	},
 }
