@@ -32,3 +32,26 @@ Content-Type: application/json
 GET {{URL_BASE}}/user/{{user_name}}
 Accept: application/json
 Content-Type: application/json
+
+@filename=sample.png
+
+###
+# @name UploadFile
+PUT {{URL_BASE}}/upload/{{filename}}
+Accept: application/json
+Content-Type: application/json
+
+< {{filename}}
+
+###
+# curl -XPUT http://localhost:8080/v2/upload/sample.png -d sample.png
+curl -XPUT {{URL_BASE}}/upload/{{filename}} -d @{{filename}}
+
+###
+# @name DownloadFile
+GET {{URL_BASE}}/download/{{filename}}
+Accept: application/json
+Content-Type: application/json
+
+###
+# curl -XGET http://localhost:8080/v2/download/sample.png -o download.png
